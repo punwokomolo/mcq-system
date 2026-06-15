@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Grading System</title>
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #3B82F6;
+      --blue-d:      #1D4ED8;
+      --blue-l:      #EFF6FF;
+      --green:       #22C55E;
+      --green-l:     #F0FDF4;
+      --red:         #EF4444;
+      --red-l:       #FEF2F2;
+      --amber:       #F59E0B;
+      --amber-l:     #FFFBEB;
+      --purple:      #8B5CF6;
+      --bg:          #F1F5F9;
+      --card:        #FFFFFF;
+      --text:        #1E293B;
+      --text-2:      #475569;
+      --muted:       #94A3B8;
+      --border:      #E2E8F0;
+      --shadow:      0 1px 3px rgb(0 0 0/.10), 0 1px 2px -1px rgb(0 0 0/.10);
+      --shadow-md:   0 4px 6px -1px rgb(0 0 0/.10), 0 2px 4px -2px rgb(0 0 0/.10);
+      --shadow-lg:   0 10px 15px -3px rgb(0 0 0/.10), 0 4px 6px -4px rgb(0 0 0/.10);
+      --r:           12px;
+      --r-sm:        8px;
+      --font:        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    .site-header {
+      background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 50%, #6366F1 100%);
+      color: #fff;
+      padding: 2rem 2rem 1.75rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .site-header h1 {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      position: relative;
+    }
+    .site-header p {
+      opacity: .80;
+      margin-top: .35rem;
+      font-size: .95rem;
+      position: relative;
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: .2rem .75rem;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: .75rem;
+      position: relative;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ─────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .card + .card { margin-top: 1.25rem; }
+
+    .card-title {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Form Controls ─────────────────────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field + .field { margin-top: .875rem; }
+
+    label.field-label {
+      font-size: .825rem;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: .6rem .875rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: .9rem;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--card);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    select { cursor: pointer; }
+
+    /* ── Tabs ───────────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: .375rem;
+      background: var(--bg);
+      border-radius: var(--r-sm);
+      padding: .3rem;
+      margin-bottom: 1.25rem;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: .55rem 1rem;
+      border: none;
+      border-radius: calc(var(--r-sm) - 2px);
+      font-size: .875rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      color: var(--text-2);
+      background: transparent;
+      transition: all .2s;
+    }
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--blue);
+      box-shadow: var(--shadow);
+    }
+    .tab-btn:not(.active):hover { background: rgba(0,0,0,.04); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Question Blocks ────────────────────────────────────────────────── */
+    .question-block {
+      padding: 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      margin-bottom: .875rem;
+      transition: border-color .2s;
+    }
+    .question-block:last-of-type { margin-bottom: 1.25rem; }
+    .question-block.answered { border-color: #93C5FD; background: #F8FBFF; }
+
+    .question-text {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: .75rem;
+      line-height: 1.5;
+    }
+    .q-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--blue);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: .1rem .375rem;
+      margin-right: .5rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .45rem;
+    }
+    @media (max-width: 500px) {
+      .options-grid { grid-template-columns: 1fr; }
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .5rem .75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      font-size: .85rem;
+      transition: all .15s;
+      user-select: none;
+    }
+    .option-label:hover { border-color: var(--blue); background: var(--blue-l); }
+    .option-label:has(input:checked) {
+      border-color: var(--blue);
+      background: var(--blue-l);
+    }
+    .option-label input[type="radio"] { display: none; }
+
+    .option-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-2);
+      font-size: .7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all .15s;
+    }
+    .option-label:has(input:checked) .option-badge {
+      background: var(--blue);
+      color: #fff;
+    }
+    .option-text { color: var(--text-2); font-size: .83rem; }
+
+    /* ── File Upload ────────────────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--bg);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--blue);
+      background: var(--blue-l);
+    }
+    .drop-zone.has-file {
+      border-color: var(--green);
+      background: var(--green-l);
+    }
+
+    .drop-icon {
+      font-size: 2.5rem;
+      margin-bottom: .75rem;
+      display: block;
+    }
+    .drop-title {
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--text);
+      margin-bottom: .35rem;
+    }
+    .drop-sub {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .file-browse-btn {
+      display: inline-block;
+      padding: .5rem 1.25rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: .825rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-2);
+      transition: all .15s;
+    }
+    .file-browse-btn:hover { border-color: var(--blue); color: var(--blue); }
+    #file-input { display: none; }
+
+    .file-name-display {
+      margin-top: .875rem;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding: .4rem .75rem;
+      background: rgba(0,0,0,.04);
+      border-radius: var(--r-sm);
+      display: inline-block;
+    }
+    .drop-zone.has-file .file-name-display { color: var(--green); background: rgba(34,197,94,.1); }
+
+    .format-hint {
+      margin-top: 1rem;
+      padding: .875rem 1rem;
+      background: var(--amber-l);
+      border: 1px solid rgba(245,158,11,.25);
+      border-radius: var(--r-sm);
+    }
+    .format-hint h5 {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--amber);
+      margin-bottom: .5rem;
+    }
+    .format-hint pre {
+      font-size: .78rem;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      line-height: 1.8;
+    }
+
+    /* ── Buttons ────────────────────────────────────────────────────────── */
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      padding: .75rem 1.5rem;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-d) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      font-size: .925rem;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 1rem;
+      box-shadow: 0 4px 14px rgba(59,130,246,.35);
+    }
+    .btn-primary:hover:not(:disabled) { opacity: .92; }
+    .btn-primary:active:not(:disabled) { transform: scale(.99); }
+    .btn-primary:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      padding: .65rem 1.25rem;
+      background: transparent;
+      color: var(--blue);
+      border: 1.5px solid var(--blue);
+      border-radius: var(--r-sm);
+      font-size: .875rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 1rem;
+    }
+    .btn-secondary:hover { background: var(--blue-l); }
+
+    /* ── Results Panel ──────────────────────────────────────────────────── */
+    .results-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--card);
+      border-radius: var(--r);
+      border: 2px dashed var(--border);
+      padding: 2rem;
+      gap: .75rem;
+    }
+    .results-placeholder-icon { font-size: 3.5rem; opacity: .4; }
+    .results-placeholder h3 { font-size: 1rem; font-weight: 700; color: var(--text-2); }
+    .results-placeholder p { font-size: .85rem; max-width: 220px; }
+
+    /* ── Results Card ───────────────────────────────────────────────────── */
+    .results-card { animation: fadeSlideIn .4s ease; }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .results-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .results-header .student-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .results-header .quiz-title {
+      font-size: .825rem;
+      color: var(--muted);
+      margin-top: .2rem;
+    }
+
+    /* ── Score Ring ─────────────────────────────────────────────────────── */
+    .score-section {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .score-ring-wrap {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      flex-shrink: 0;
+    }
+    .ring-svg {
+      width: 110px;
+      height: 110px;
+      transform: rotate(-90deg);
+    }
+    .ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 9;
+    }
+    .ring-progress {
+      fill: none;
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-dasharray: 283;   /* 2π × 45 ≈ 283 */
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1), stroke .4s;
+    }
+    .ring-progress.pass { stroke: var(--green); }
+    .ring-progress.fail { stroke: var(--red); }
+
+    .ring-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .05rem;
+    }
+    .ring-pct {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+    .ring-pct.pass { color: var(--green); }
+    .ring-pct.fail { color: var(--red); }
+    .ring-sub-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+    .score-meta { flex: 1; }
+    .score-fraction {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .score-fraction span { font-size: .9rem; font-weight: 500; color: var(--muted); }
+    .grade-badge {
+      display: inline-block;
+      margin-top: .5rem;
+      padding: .3rem .875rem;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .grade-a { background: #DCFCE7; color: #166534; }
+    .grade-b { background: #D1FAE5; color: #065F46; }
+    .grade-c { background: #FEF9C3; color: #854D0E; }
+    .grade-d { background: #FFEDD5; color: #9A3412; }
+    .grade-f { background: #FEE2E2; color: #991B1B; }
+
+    /* ── Progress Bar ───────────────────────────────────────────────────── */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+    }
+    .progress-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 1.1s cubic-bezier(.4,0,.2,1);
+    }
+    .progress-fill.pass { background: linear-gradient(90deg, var(--green), #16A34A); }
+    .progress-fill.fail { background: linear-gradient(90deg, var(--red), #B91C1C); }
+    .progress-pct { font-size: .8rem; font-weight: 700; color: var(--text-2); min-width: 2.5rem; text-align: right; }
+
+    /* ── Breakdown ──────────────────────────────────────────────────────── */
+    .breakdown-header {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .breakdown-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .breakdown-list { display: flex; flex-direction: column; gap: .45rem; }
+
+    .bd-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .55rem .875rem;
+      border-radius: var(--r-sm);
+      font-size: .85rem;
+      border: 1px solid transparent;
+    }
+    .bd-item.correct { background: var(--green-l); border-color: #BBF7D0; }
+    .bd-item.incorrect { background: var(--red-l); border-color: #FECACA; }
+
+    .bd-icon {
+      font-size: 1rem;
+      font-weight: 700;
+      width: 1.25rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .bd-item.correct .bd-icon { color: var(--green); }
+    .bd-item.incorrect .bd-icon { color: var(--red); }
+
+    .bd-qnum {
+      font-weight: 700;
+      color: var(--text-2);
+      min-width: 2.5rem;
+    }
+    .bd-answers { flex: 1; color: var(--text-2); }
+    .bd-answers strong { color: var(--text); }
+    .correct-key {
+      font-weight: 700;
+      color: var(--green);
+      margin-left: .375rem;
+    }
+    .bd-item.correct .correct-key { display: none; }
+
+    /* ── History Table ──────────────────────────────────────────────────── */
+    .history-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2.5rem;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .history-table-wrap {
+      background: var(--card);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    thead { background: var(--bg); }
+    th {
+      text-align: left;
+      padding: .7rem 1rem;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: .75rem 1rem;
+      color: var(--text-2);
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+
+    .pct-pass { color: var(--green); font-weight: 700; }
+    .pct-fail { color: var(--red); font-weight: 700; }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    /* ── Toast ──────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: #1E293B;
+      color: #fff;
+      padding: .75rem 1.5rem;
+      border-radius: 999px;
+      font-size: .875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: all .25s;
+      z-index: 999;
+      white-space: nowrap;
+      max-width: 90vw;
+      white-space: normal;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); }
+
+    /* ── Spinner ────────────────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Utility ────────────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+    .empty-msg { color: var(--muted); font-size: .875rem; font-style: italic; padding: 1rem 0; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-badge">&#127891; Assessment Platform</div>
+  <h1>MCQ Grading System</h1>
+  <p>Submit answers via web form or file upload &mdash; get instant, detailed feedback</p>
+</header>
+
+<!-- ═══════════════════════════ MAIN LAYOUT ═══════════════════════════════ -->
+<main class="layout">
+
+  <!-- ─────────── LEFT PANEL: Input ─────────── -->
+  <section class="panel panel--input">
+
+    <!-- Student Info -->
+    <div class="card">
+      <p class="card-title">&#128100; Student Information</p>
+
+      <div class="field">
+        <label class="field-label" for="studentName">Full Name</label>
+        <input
+          type="text"
+          id="studentName"
+          placeholder="e.g. Jane Doe"
+          maxlength="100"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="quizSelect">Quiz</label>
+        <select id="quizSelect">
+          <option value="">&#8212; Loading quizzes&hellip; &#8212;</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Submission Method Tabs -->
+    <div class="card">
+      <div class="tabs" role="tablist" aria-label="Submission method">
+        <button class="tab-btn active" data-tab="form" role="tab" aria-selected="true">
+          &#128221; Web Form
+        </button>
+        <button class="tab-btn" data-tab="file" role="tab" aria-selected="false">
+          &#128196; File Upload
+        </button>
+      </div>
+
+      <!-- ── Tab: Web Form ── -->
+      <div class="tab-content active" id="tab-form" role="tabpanel">
+        <form id="mcq-form" novalidate>
+          <div id="questions-container">
+            <p class="empty-msg">Select a quiz above to load questions.</p>
+          </div>
+          <button type="submit" class="btn-primary" id="submit-form-btn">
+            &#9989; Submit &amp; Grade
+          </button>
+        </form>
+      </div>
+
+      <!-- ── Tab: File Upload ── -->
+      <div class="tab-content" id="tab-file" role="tabpanel">
+
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
+             aria-label="File drop zone. Click or drag a file here.">
+          <span class="drop-icon">&#128196;</span>
+          <p class="drop-title">Drag &amp; drop your answer sheet</p>
+          <p class="drop-sub">or click to browse</p>
+          <label class="file-browse-btn">
+            Browse File
+            <input type="file" id="file-input" accept=".txt,.csv,.json" />
+          </label>
+          <div class="file-name-display" id="file-name">No file selected</div>
+        </div>
+
+        <div class="format-hint">
+          <h5>&#128161; Accepted File Formats</h5>
+          <pre>CSV  →  A,B,C,A,D
+TXT  →  A         (one answer per line)
+         B
+         C
+         A
+         D
+JSON →  ["A","B","C","A","D"]</pre>
+        </div>
+
+        <button type="button" class="btn-primary" id="grade-file-btn">
+          &#128640; Upload &amp; Grade
+        </button>
+      </div>
+
+    </div><!-- /card -->
+  </section><!-- /panel--input -->
+
+  <!-- ─────────── RIGHT PANEL: Results ─────────── -->
+  <section class="panel panel--results">
+
+    <!-- Placeholder state -->
+    <div class="results-placeholder" id="results-placeholder">
+      <span class="results-placeholder-icon">&#128202;</span>
+      <h3>Your Report Card</h3>
+      <p>Complete a quiz on the left to see your detailed grade here.</p>
+    </div>
+
+    <!-- Results Card (hidden until graded) -->
+    <div class="card results-card hidden" id="results-card">
+
+      <div class="results-header">
+        <p class="student-name" id="result-name">—</p>
+        <p class="quiz-title" id="result-quiz">—</p>
+      </div>
+
+      <!-- Score Ring + Meta -->
+      <div class="score-section">
+        <div class="score-ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="ring-bg"       cx="50" cy="50" r="45"/>
+            <circle class="ring-progress" cx="50" cy="50" r="45" id="ring-progress"/>
+          </svg>
+          <div class="ring-label">
+            <span class="ring-pct" id="ring-pct">—</span>
+            <span class="ring-sub-label">score</span>
+          </div>
+        </div>
+
+        <div class="score-meta">
+          <div class="score-fraction">
+            <span id="score-fraction">—</span>
+            <span> correct</span>
+          </div>
+          <div class="grade-badge" id="grade-badge">—</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+
+      <!-- Question-by-question Breakdown -->
+      <p class="breakdown-header">Question Breakdown</p>
+      <div class="breakdown-list" id="breakdown-list"></div>
+
+      <button type="button" class="btn-secondary" id="reset-btn">
+        &#8635; New Submission
+      </button>
+    </div>
+
+  </section><!-- /panel--results -->
+</main>
+
+<!-- ═══════════════════════════ HISTORY TABLE ═════════════════════════════ -->
+<section class="history-section">
+  <p class="section-title">&#128203; Recent Submissions</p>
+  <div class="history-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Quiz</th>
+          <th>Score</th>
+          <th>Percentage</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="history-tbody">
+        <tr class="empty-row"><td colspan="5">Loading history&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

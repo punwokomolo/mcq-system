@@ -1,0 +1,16 @@
+{
+  "name": "mcq-grading-system",
+  "version": "1.0.0",
+  "description": "Automated MCQ Grading and Assessment System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@seald-io/nedb": "^4.0.4",
+    "@supabase/supabase-js": "^2.108.1",
+    "express": "^4.18.3",
+    "multer": "^1.4.5-lts.1"
+  }
+}
