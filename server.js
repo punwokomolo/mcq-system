@@ -15,9 +15,24 @@ const USE_SUPABASE = !!(SUPABASE_URL && SUPABASE_KEY);
 
 let db;
 
+const SEED_QUIZZES = [
+  { quizId: 'math101', title: 'Mathematics 101',     masterKey: ['A', 'B', 'C', 'A', 'D'] },
+  { quizId: 'sci101',  title: 'General Science 101', masterKey: ['B', 'A', 'D', 'C', 'B'] },
+  { quizId: 'eng101',  title: 'English Grammar 101', masterKey: ['C', 'A', 'B', 'D', 'C'] },
+];
+
 if (USE_SUPABASE) {
   const { createClient } = require('@supabase/supabase-js');
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Idempotent seed — safe to run on every startup
+  (async () => {
+    const { error } = await supabase.from('quizzes').upsert(
+      SEED_QUIZZES.map(q => ({ quiz_id: q.quizId, title: q.title, master_key: q.masterKey })),
+      { onConflict: 'quiz_id', ignoreDuplicates: true }
+    );
+    if (error) console.error('[seed]', error.message);
+  })();
 
   db = {
     async findQuiz(quizId) {
@@ -88,12 +103,6 @@ if (USE_SUPABASE) {
 
   quizzesDb.ensureIndex({ fieldName: 'quizId', unique: true });
   submissionsDb.ensureIndex({ fieldName: 'submittedAt' });
-
-  const SEED_QUIZZES = [
-    { quizId: 'math101', title: 'Mathematics 101',     masterKey: ['A', 'B', 'C', 'A', 'D'] },
-    { quizId: 'sci101',  title: 'General Science 101', masterKey: ['B', 'A', 'D', 'C', 'B'] },
-    { quizId: 'eng101',  title: 'English Grammar 101', masterKey: ['C', 'A', 'B', 'D', 'C'] },
-  ];
 
   (async () => {
     for (const quiz of SEED_QUIZZES) {
